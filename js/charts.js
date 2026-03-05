@@ -517,6 +517,71 @@ function renderPoliticsPanel(containerId, politicsData) {
 }
 
 /* ----------------------------------------------------------
+   Render an alcohol laws panel with Summary / Full Analysis toggle
+   Each city card has a summary view and an expandable full details view
+   ---------------------------------------------------------- */
+function renderAlcoholLawsPanel(containerId, politicsData) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const colors = getCityColors();
+  container.innerHTML = "";
+
+  // Toggle bar
+  const toggleBar = document.createElement("div");
+  toggleBar.className = "lifestyle-toggle-bar";
+  toggleBar.innerHTML = `
+    <span class="lifestyle-toggle-label">View:</span>
+    <button class="lifestyle-toggle-btn active" data-view="short">Summary</button>
+    <button class="lifestyle-toggle-btn" data-view="long">Full Analysis</button>
+  `;
+  container.appendChild(toggleBar);
+
+  toggleBar.addEventListener("click", (e) => {
+    const btn = e.target.closest(".lifestyle-toggle-btn");
+    if (!btn) return;
+    const view = btn.dataset.view;
+    toggleBar.querySelectorAll(".lifestyle-toggle-btn").forEach(b => b.classList.toggle("active", b.dataset.view === view));
+    container.querySelectorAll(".alcohol-view-short").forEach(el => el.style.display = view === "short" ? "" : "none");
+    container.querySelectorAll(".alcohol-view-long").forEach(el => el.style.display = view === "long" ? "" : "none");
+  });
+
+  // City cards grid
+  const grid = document.createElement("div");
+  grid.className = "politics-panel-grid";
+
+  CITY_DATA.meta.cities.forEach(city => {
+    const d = politicsData.values[city.key];
+    if (!d) return;
+
+    const card = document.createElement("div");
+    card.className = "politics-card";
+    card.style.borderLeftColor = colors[city.key];
+
+    const header = `
+      <div class="politics-card-header">
+        <span class="politics-city-dot" style="background:${colors[city.key]}"></span>
+        <strong>${city.label}</strong>
+      </div>`;
+
+    const shortView = document.createElement("div");
+    shortView.className = "alcohol-view-short";
+    shortView.innerHTML = header + `<p class="politics-card-full">${d.summary}</p>`;
+
+    const longView = document.createElement("div");
+    longView.className = "alcohol-view-long";
+    longView.style.display = "none";
+    longView.innerHTML = header + `<p class="politics-card-full">${d.details}</p>`;
+
+    card.appendChild(shortView);
+    card.appendChild(longView);
+    grid.appendChild(card);
+  });
+
+  container.appendChild(grid);
+}
+
+/* ----------------------------------------------------------
    Render lifestyle highlights panel
    Toggle between short (4-category grid) and long (full analysis
    with categories preserved as named sections)
@@ -531,7 +596,7 @@ function renderLifestyleHighlights(containerId, contextData) {
   // Global short/long toggle — only shown once, above all cities
   const hasFullAnalysis = CITY_DATA.meta.cities.some(city => {
     const v = contextData.values[city.key];
-    return v && (v.skiingFull || v.blmFull || v.aviationFull || v.motorcycleFull);
+    return v && (v.skiingFull || v.blmFull || v.aviationFull || v.motorcycleFull || v.socialFull);
   });
   if (hasFullAnalysis) {
     const toggleBar = document.createElement("div");
@@ -560,31 +625,32 @@ function renderLifestyleHighlights(containerId, contextData) {
     const section = document.createElement("div");
     section.className = "lifestyle-highlights-city";
 
-    // Short view (4-category grid)
+    // Build categories array dynamically
+    const categories = [
+      { label: "Skiing Access",      short: d.skiing,     full: d.skiingFull },
+      { label: "BLM / Public Land",  short: d.blm,        full: d.blmFull },
+      { label: "Aviation (SoCal)",   short: d.aviation,   full: d.aviationFull },
+      { label: "Motorcycle Culture", short: d.motorcycle, full: d.motorcycleFull }
+    ];
+    if (d.social) {
+      categories.push({ label: "Social Scene & Networking", short: d.social, full: d.socialFull });
+    }
+
+    // Short view (dynamic category grid)
     const shortView = document.createElement("div");
     shortView.className = "lifestyle-view-short";
+    const shortItemsHtml = categories.map(cat => `
+      <div class="highlight-item">
+        <div class="highlight-label">${cat.label}</div>
+        <div class="highlight-text">${cat.short || ""}</div>
+      </div>`).join("");
     shortView.innerHTML = `
       <div class="lifestyle-city-header" style="border-left-color:${colors[city.key]}">
         <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${colors[city.key]};margin-right:8px;vertical-align:middle;flex-shrink:0"></span>
         <strong>${city.label}</strong>
       </div>
       <div class="lifestyle-highlights-grid">
-        <div class="highlight-item">
-          <div class="highlight-label">Skiing Access</div>
-          <div class="highlight-text">${d.skiing}</div>
-        </div>
-        <div class="highlight-item">
-          <div class="highlight-label">BLM / Public Land</div>
-          <div class="highlight-text">${d.blm}</div>
-        </div>
-        <div class="highlight-item">
-          <div class="highlight-label">Aviation (SoCal)</div>
-          <div class="highlight-text">${d.aviation}</div>
-        </div>
-        <div class="highlight-item">
-          <div class="highlight-label">Motorcycle Culture</div>
-          <div class="highlight-text">${d.motorcycle}</div>
-        </div>
+        ${shortItemsHtml}
       </div>
     `;
 
@@ -592,13 +658,6 @@ function renderLifestyleHighlights(containerId, contextData) {
     const longView = document.createElement("div");
     longView.className = "lifestyle-view-long";
     longView.style.display = "none";
-
-    const categories = [
-      { label: "Skiing Access",      short: d.skiing,     full: d.skiingFull },
-      { label: "BLM / Public Land",  short: d.blm,        full: d.blmFull },
-      { label: "Aviation (SoCal)",   short: d.aviation,   full: d.aviationFull },
-      { label: "Motorcycle Culture", short: d.motorcycle, full: d.motorcycleFull }
-    ];
 
     const catItemsHtml = categories.map(cat => `
       <div class="highlight-item highlight-item-full">

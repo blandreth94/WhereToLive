@@ -731,6 +731,19 @@ function renderPoliticsTab() {
   renderBarChart(propCrimeCard.canvasId, safety.propertyCrimeRate);
   renderAnalysisBlock(propCrimeCard.analysisId, safety.propertyCrimeRate);
 
+  // --- Alcohol Laws ---
+  if (p && p.alcoholLaws) {
+    const alcoholGrid = buildPoliticsSection(outerGrid, "Alcohol Laws & Hospitality Ecosystem");
+    const alcoholId = buildContextCard(alcoholGrid, {
+      id: "panel-alcohol-laws",
+      title: p.alcoholLaws.label,
+      sourceName: p.alcoholLaws.source.name,
+      sourceUrl:  p.alcoholLaws.source.url,
+      fullWidth: true
+    });
+    renderAlcoholLawsPanel(alcoholId, p.alcoholLaws);
+  }
+
   // --- Employment Law ---
   if (p && p.employmentLaw) {
     const empGrid = buildPoliticsSection(outerGrid, "Employment Law & Worker Protections");
@@ -759,6 +772,7 @@ function renderPoliticsTab() {
 
   // Sources
   const allSources = collectSources(safety);
+  if (p && p.alcoholLaws)   allSources.push({ name: p.alcoholLaws.source.name,   url: p.alcoholLaws.source.url });
   if (p && p.employmentLaw) allSources.push({ name: p.employmentLaw.source.name, url: p.employmentLaw.source.url });
   if (p && p.firearmsLaw)   allSources.push({ name: p.firearmsLaw.source.name,   url: p.firearmsLaw.source.url });
   renderSources("sources-list-politics", allSources);

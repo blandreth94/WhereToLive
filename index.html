@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WhereToLive — City Comparison</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <h1 class="site-title">WhereToLive</h1>
+      <p class="site-subtitle">A data-driven comparison of cities and suburbs for relocation</p>
+    </div>
+  </header>
+
+  <main class="main-content">
+
+    <!-- City Legend -->
+    <div class="city-legend" id="cityLegend"></div>
+
+    <!-- Tab Navigation -->
+    <nav class="tab-nav" role="tablist" aria-label="Comparison categories">
+      <button class="tab-btn active" role="tab" data-tab="cost" aria-selected="true">
+        Cost of Living
+      </button>
+      <button class="tab-btn" role="tab" data-tab="climate" aria-selected="false">
+        Climate &amp; Safety
+      </button>
+      <button class="tab-btn" role="tab" data-tab="lifestyle" aria-selected="false">
+        Lifestyle &amp; Services
+      </button>
+      <button class="tab-btn" role="tab" data-tab="childcare" aria-selected="false">
+        Childcare &amp; Education
+      </button>
+    </nav>
+
+    <!-- Tab Panels -->
+    <div class="tab-panels">
+
+      <!-- Cost of Living Tab -->
+      <section class="tab-panel active" id="tab-cost" role="tabpanel">
+        <div class="panel-intro">
+          <h2>Cost of Living &amp; Taxes</h2>
+          <p>Housing prices, market rents (with suburb breakdowns), household income, state income tax, property tax, and sales tax rates across all six locations. Expand the <strong>Analysis &amp; Context</strong> section under each chart for a deeper qualitative comparison.</p>
+        </div>
+        <div class="charts-grid" id="charts-cost"></div>
+        <details class="sources-panel" id="sources-cost">
+          <summary>Data Sources &amp; Methodology</summary>
+          <ul id="sources-list-cost"></ul>
+        </details>
+      </section>
+
+      <!-- Climate & Safety Tab -->
+      <section class="tab-panel" id="tab-climate" role="tabpanel">
+        <div class="panel-intro">
+          <h2>Climate &amp; Safety</h2>
+          <p>Summer heat, winter cold, annual precipitation, snowfall, sunny days, FEMA natural disaster risk scores (tornado, flood, wildfire), and crime rates. Each chart includes per-city qualitative analysis.</p>
+        </div>
+        <div class="charts-grid" id="charts-climate"></div>
+        <details class="sources-panel" id="sources-climate">
+          <summary>Data Sources &amp; Methodology</summary>
+          <ul id="sources-list-climate"></ul>
+        </details>
+      </section>
+
+      <!-- Lifestyle & Services Tab -->
+      <section class="tab-panel" id="tab-lifestyle" role="tabpanel">
+        <div class="panel-intro">
+          <h2>Lifestyle &amp; Services</h2>
+          <p>Commute times (with suburb-to-city routes), parkland, monthly utility costs, auto insurance rates, public transit options, vehicle registration costs, and lifestyle highlights including skiing, BLM land access, aviation connectivity, and motorcycle culture.</p>
+        </div>
+        <div class="charts-grid" id="charts-lifestyle"></div>
+        <details class="sources-panel" id="sources-lifestyle">
+          <summary>Data Sources &amp; Methodology</summary>
+          <ul id="sources-list-lifestyle"></ul>
+        </details>
+      </section>
+
+      <!-- Childcare & Education Tab -->
+      <section class="tab-panel" id="tab-childcare" role="tabpanel">
+        <div class="panel-intro">
+          <h2>Childcare &amp; Education</h2>
+          <p>Annual center-based childcare costs by age group (infant, toddler, PreK), state public PreK enrollment rates, school district letter grades with suburb-level breakdowns. Qualitative analysis highlights key differences in program quality and cost structure.</p>
+        </div>
+        <div class="charts-grid" id="charts-childcare"></div>
+        <details class="sources-panel" id="sources-childcare">
+          <summary>Data Sources &amp; Methodology</summary>
+          <ul id="sources-list-childcare"></ul>
+        </details>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p>All data sourced from official U.S. government sources and authoritative research organizations. Quantitative data is followed by qualitative analysis — expand the "Analysis &amp; Context" section under each chart for deeper per-city comparisons. Suburb data is shown in expanded tables beneath relevant charts.</p>
+      <p class="footer-meta">Last updated: <span id="lastUpdated"></span> &nbsp;|&nbsp; Data reflects 2024–2026 reporting periods</p>
+    </div>
+  </footer>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- App scripts (order matters) -->
+  <script src="js/data.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>

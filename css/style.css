@@ -1,0 +1,721 @@
+/* ============================================================
+   WhereToLive — Main Stylesheet
+   ============================================================ */
+
+/* --- Reset & Base ----------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* City colors — consistent across all charts */
+  --color-roanoke:  #4e79a7;
+  --color-waldorf:  #f28e2b;
+  --color-denver:   #e15759;
+  --color-slc:      #76b7b2;
+  --color-raleigh:  #59a14f;
+  --color-dfw:      #b07aa1;
+
+  /* UI colors */
+  --bg-page:        #f4f6f9;
+  --bg-card:        #ffffff;
+  --bg-header:      #1a2332;
+  --bg-tab-active:  #1a2332;
+  --bg-tab-hover:   #e8edf3;
+  --text-primary:   #1a2332;
+  --text-secondary: #5a6a7e;
+  --text-light:     #ffffff;
+  --border:         #dde3ec;
+  --accent:         #4e79a7;
+
+  /* Spacing */
+  --space-xs:  0.25rem;
+  --space-sm:  0.5rem;
+  --space-md:  1rem;
+  --space-lg:  1.5rem;
+  --space-xl:  2rem;
+  --space-2xl: 3rem;
+
+  /* Sizing */
+  --max-width:    1200px;
+  --radius-sm:    4px;
+  --radius-md:    8px;
+  --radius-lg:    12px;
+  --shadow-card:  0 1px 4px rgba(0,0,0,0.08), 0 2px 12px rgba(0,0,0,0.05);
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* --- Site Header ------------------------------------------ */
+.site-header {
+  background: var(--bg-header);
+  color: var(--text-light);
+  padding: var(--space-xl) var(--space-lg);
+}
+
+.header-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.site-title {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: var(--space-xs);
+}
+
+.site-subtitle {
+  font-size: 1rem;
+  opacity: 0.75;
+  font-weight: 400;
+}
+
+/* --- Main Content ----------------------------------------- */
+.main-content {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-lg);
+}
+
+/* --- City Legend ------------------------------------------ */
+.city-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* --- Tab Navigation --------------------------------------- */
+.tab-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-lg);
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 0;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  padding: var(--space-sm) var(--space-lg);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+
+.tab-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-tab-hover);
+}
+
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+/* --- Tab Panels ------------------------------------------- */
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+.panel-intro {
+  margin-bottom: var(--space-xl);
+}
+
+.panel-intro h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: var(--space-xs);
+}
+
+.panel-intro p {
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+}
+
+/* --- Charts Grid ------------------------------------------ */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+  gap: var(--space-xl);
+  margin-bottom: var(--space-xl);
+}
+
+/* Full-width card override */
+.chart-card.full-width {
+  grid-column: 1 / -1;
+}
+
+/* --- Chart Card ------------------------------------------- */
+.chart-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-lg) var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.chart-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.chart-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.chart-card-source {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.chart-card-source a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.chart-card-source a:hover {
+  text-decoration: underline;
+}
+
+.chart-wrapper {
+  position: relative;
+  height: 260px;
+}
+
+/* Taller wrapper for grouped charts */
+.chart-wrapper.tall {
+  height: 320px;
+}
+
+/* --- Stat Cards (qualitative data) ------------------------ */
+.stat-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-md);
+}
+
+.stat-card {
+  background: var(--bg-page);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  text-align: center;
+  border: 1px solid var(--border);
+}
+
+.stat-card-city {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-xs);
+  color: var(--text-secondary);
+}
+
+.stat-card-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.stat-card-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* Grade coloring */
+.grade-a-plus, .grade-a  { color: #2d7a2d; }
+.grade-a-minus           { color: #4a9e4a; }
+.grade-b-plus, .grade-b  { color: #7aad2d; }
+.grade-b-minus           { color: #9dbf45; }
+.grade-c-plus, .grade-c  { color: #d4a017; }
+.grade-c-minus           { color: #c47f1a; }
+.grade-d, .grade-f       { color: #c0392b; }
+
+/* City color dot in stat card */
+.stat-card-city-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* --- Data Table ------------------------------------------- */
+.data-table-wrapper {
+  overflow-x: auto;
+}
+
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+table.data-table th,
+table.data-table td {
+  padding: var(--space-sm) var(--space-md);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+table.data-table th {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--bg-page);
+}
+
+table.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+table.data-table td.highlight-good {
+  color: #2d7a2d;
+  font-weight: 600;
+}
+
+table.data-table td.highlight-bad {
+  color: #c0392b;
+  font-weight: 600;
+}
+
+/* --- Sources Panel ---------------------------------------- */
+.sources-panel {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  padding: var(--space-md) var(--space-lg);
+  margin-top: var(--space-md);
+}
+
+.sources-panel summary {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+  padding: var(--space-xs) 0;
+}
+
+.sources-panel summary:hover {
+  color: var(--text-primary);
+}
+
+.sources-panel ul {
+  list-style: none;
+  margin-top: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.sources-panel li {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  padding-left: var(--space-md);
+  border-left: 2px solid var(--border);
+}
+
+.sources-panel li a {
+  color: var(--accent);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.sources-panel li a:hover {
+  text-decoration: underline;
+}
+
+/* --- Site Footer ------------------------------------------ */
+.site-footer {
+  background: var(--bg-header);
+  color: rgba(255,255,255,0.65);
+  padding: var(--space-xl) var(--space-lg);
+  margin-top: var(--space-2xl);
+}
+
+.footer-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  font-size: 0.8125rem;
+}
+
+.footer-inner a {
+  color: rgba(255,255,255,0.75);
+}
+
+.footer-inner a:hover {
+  color: #ffffff;
+}
+
+.footer-meta {
+  opacity: 0.6;
+}
+
+/* --- Loading State ---------------------------------------- */
+.loading-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 260px;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+/* --- Section Divider -------------------------------------- */
+.section-divider {
+  padding: var(--space-sm) 0 var(--space-xs);
+  border-bottom: 2px solid var(--border);
+  margin-bottom: calc(-1 * var(--space-sm));
+}
+
+.section-divider h3 {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+}
+
+/* --- Analysis Details (collapsible under each chart) ------ */
+.analysis-details {
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.analysis-details summary {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+  padding: var(--space-xs) 0;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.analysis-details summary::before {
+  content: "▶";
+  font-size: 0.625rem;
+  transition: transform 0.2s;
+  color: var(--accent);
+}
+
+.analysis-details[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.analysis-details summary:hover {
+  color: var(--text-primary);
+}
+
+/* --- Analysis Block --------------------------------------- */
+.analysis-block {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-md);
+  padding-top: var(--space-md);
+}
+
+.analysis-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.analysis-city-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.analysis-city-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.analysis-text {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  padding-left: 18px; /* align with dot */
+}
+
+/* --- Suburb Table ----------------------------------------- */
+.suburb-table {
+  font-size: 0.8125rem;
+}
+
+.suburb-table .city-row td {
+  background: var(--bg-page);
+  font-weight: 600;
+  border-top: 2px solid var(--border);
+}
+
+.suburb-table .city-row td:first-child {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.suburb-table .suburb-row td {
+  color: var(--text-secondary);
+}
+
+.suburb-table .suburb-indent {
+  padding-left: calc(var(--space-md) + 16px);
+  font-style: italic;
+}
+
+.suburb-city-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* --- Vehicle Costs Grid ----------------------------------- */
+.vehicle-costs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-md);
+  padding-top: var(--space-sm);
+}
+
+.vehicle-card {
+  background: var(--bg-page);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  border-left: 4px solid transparent;
+  padding: var(--space-md);
+}
+
+.vehicle-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-sm);
+  font-size: 0.875rem;
+}
+
+.vehicle-city-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.vehicle-card-costs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.vehicle-cost-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.8125rem;
+}
+
+.vehicle-cost-label {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.vehicle-cost-value {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 0.9375rem;
+}
+
+.vehicle-card-notes {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* --- Lifestyle Highlights --------------------------------- */
+.lifestyle-highlights-city {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  margin-bottom: var(--space-md);
+  background: var(--bg-card);
+}
+
+.lifestyle-city-header {
+  display: flex;
+  align-items: center;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border);
+  padding-left: var(--space-md);
+  border-left: 4px solid var(--accent);
+}
+
+.lifestyle-highlights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-md);
+}
+
+.highlight-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.highlight-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+}
+
+.highlight-text {
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+  line-height: 1.55;
+}
+
+/* --- Responsive ------------------------------------------- */
+@media (max-width: 768px) {
+  .site-title {
+    font-size: 1.5rem;
+  }
+
+  .main-content {
+    padding: var(--space-lg) var(--space-md);
+  }
+
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tab-btn {
+    padding: var(--space-sm) var(--space-md);
+    font-size: 0.875rem;
+  }
+
+  .chart-card {
+    padding: var(--space-md);
+  }
+
+  .city-legend {
+    gap: var(--space-sm);
+  }
+
+  .stat-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .analysis-block {
+    grid-template-columns: 1fr;
+  }
+
+  .vehicle-costs-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lifestyle-highlights-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .tab-nav {
+    gap: 0;
+  }
+
+  .tab-btn {
+    padding: var(--space-sm);
+    font-size: 0.8125rem;
+  }
+
+  .stat-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

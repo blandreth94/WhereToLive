@@ -330,13 +330,76 @@ function renderCostTab() {
 }
 
 /* ----------------------------------------------------------
-   RENDER: Climate & Safety Tab
+   RENDER: Ongoing Expenses Tab
+   (Utilities, Auto Insurance, Vehicle Registration)
+   ---------------------------------------------------------- */
+function renderExpensesTab() {
+  const d = CITY_DATA.lifestyle;  // utilities & insurance live here in data.js
+  const ctx = CITY_DATA.context;
+  const grid = "charts-expenses";
+
+  // Monthly Utilities chart
+  const utilCard = buildChartCardWithAnalysis(grid, {
+    id: "chart-utilities",
+    title: d.monthlyUtilities.label,
+    sourceName: d.monthlyUtilities.source.name,
+    sourceUrl:  d.monthlyUtilities.source.url
+  });
+  renderBarChart(utilCard.canvasId, d.monthlyUtilities);
+  renderAnalysisBlock(utilCard.analysisId, d.monthlyUtilities);
+
+  // Utilities breakdown table
+  if (d.monthlyUtilities.suburbData) {
+    const utilTableId = buildSuburbTableCard(grid, {
+      id: "table-utilities-breakdown",
+      title: d.monthlyUtilities.suburbData.title,
+      sourceName: d.monthlyUtilities.suburbData.source.name,
+      sourceUrl:  d.monthlyUtilities.suburbData.source.url
+    });
+    renderSuburbTable(utilTableId, d.monthlyUtilities.suburbData);
+  }
+
+  // Auto Insurance chart
+  const insuranceCard = buildChartCardWithAnalysis(grid, {
+    id: "chart-auto-insurance",
+    title: d.annualAutoInsurance.label,
+    sourceName: d.annualAutoInsurance.source.name,
+    sourceUrl:  d.annualAutoInsurance.source.url
+  });
+  renderBarChart(insuranceCard.canvasId, d.annualAutoInsurance);
+  renderAnalysisBlock(insuranceCard.analysisId, d.annualAutoInsurance);
+
+  // Vehicle Registration Costs panel
+  if (ctx && ctx.vehicleCosts) {
+    const vehicleId = buildContextCard(grid, {
+      id: "panel-vehicle-costs",
+      title: ctx.vehicleCosts.label + " (Two Adults, Two $25k Vehicles)",
+      sourceName: ctx.vehicleCosts.source.name,
+      sourceUrl:  ctx.vehicleCosts.source.url,
+      fullWidth: true
+    });
+    renderVehicleCostsPanel(vehicleId, ctx.vehicleCosts);
+  }
+
+  // Sources
+  const expSources = collectSources({
+    monthlyUtilities: d.monthlyUtilities,
+    annualAutoInsurance: d.annualAutoInsurance
+  });
+  if (ctx && ctx.vehicleCosts) {
+    expSources.push({ name: ctx.vehicleCosts.source.name, url: ctx.vehicleCosts.source.url });
+  }
+  renderSources("sources-list-expenses", expSources);
+}
+
+/* ----------------------------------------------------------
+   RENDER: Climate & Environment Tab
+   (Weather + Natural Disaster Risk — no crime)
    ---------------------------------------------------------- */
 function renderClimateTab() {
-  const climate = CITY_DATA.climate;
+  const climate  = CITY_DATA.climate;
   const disaster = CITY_DATA.disasterRisk;
-  const safety = CITY_DATA.safety;
-  const grid = "charts-climate";
+  const grid     = "charts-climate";
 
   // Temperature grouped chart (summer high / winter low)
   buildChartCard(grid, {
@@ -459,38 +522,20 @@ function renderClimateTab() {
   renderBarChart(wildfireCard.canvasId, disaster.wildfireRisk);
   renderAnalysisBlock(wildfireCard.analysisId, disaster.wildfireRisk);
 
-  // Violent Crime Rate
-  const violentCard = buildChartCardWithAnalysis(grid, {
-    id: "chart-violent-crime",
-    title: safety.violentCrimeRate.label,
-    sourceName: safety.violentCrimeRate.source.name,
-    sourceUrl:  safety.violentCrimeRate.source.url
-  });
-  renderBarChart(violentCard.canvasId, safety.violentCrimeRate);
-  renderAnalysisBlock(violentCard.analysisId, safety.violentCrimeRate);
-
-  // Property Crime Rate
-  const propCrimeCard = buildChartCardWithAnalysis(grid, {
-    id: "chart-property-crime",
-    title: safety.propertyCrimeRate.label,
-    sourceName: safety.propertyCrimeRate.source.name,
-    sourceUrl:  safety.propertyCrimeRate.source.url
-  });
-  renderBarChart(propCrimeCard.canvasId, safety.propertyCrimeRate);
-  renderAnalysisBlock(propCrimeCard.analysisId, safety.propertyCrimeRate);
-
-  // Sources
-  const allSources = collectSources({ ...climate, ...disaster, ...safety });
+  // Sources (climate + disaster only — crime is in Lifestyle tab)
+  const allSources = collectSources({ ...climate, ...disaster });
   renderSources("sources-list-climate", allSources);
 }
 
 /* ----------------------------------------------------------
-   RENDER: Lifestyle & Services Tab
+   RENDER: Lifestyle & Recreation Tab
+   (Commute, Transit, Parks, Crime, Lifestyle Highlights)
    ---------------------------------------------------------- */
 function renderLifestyleTab() {
-  const d = CITY_DATA.lifestyle;
-  const ctx = CITY_DATA.context;
-  const grid = "charts-lifestyle";
+  const d      = CITY_DATA.lifestyle;
+  const safety = CITY_DATA.safety;
+  const ctx    = CITY_DATA.context;
+  const grid   = "charts-lifestyle";
 
   // Commute Time
   const commuteCard = buildChartCardWithAnalysis(grid, {
@@ -514,47 +559,6 @@ function renderLifestyleTab() {
     renderSuburbTable(commuteSuburbId, d.avgCommuteMinutes.suburbData);
   }
 
-  // Park Land %
-  const parksCard = buildChartCardWithAnalysis(grid, {
-    id: "chart-parks",
-    title: d.parkLandPercent.label,
-    sourceName: d.parkLandPercent.source.name,
-    sourceUrl:  d.parkLandPercent.source.url
-  });
-  renderBarChart(parksCard.canvasId, d.parkLandPercent);
-  renderAnalysisBlock(parksCard.analysisId, d.parkLandPercent);
-
-  // Monthly Utilities
-  const utilCard = buildChartCardWithAnalysis(grid, {
-    id: "chart-utilities",
-    title: d.monthlyUtilities.label,
-    sourceName: d.monthlyUtilities.source.name,
-    sourceUrl:  d.monthlyUtilities.source.url
-  });
-  renderBarChart(utilCard.canvasId, d.monthlyUtilities);
-  renderAnalysisBlock(utilCard.analysisId, d.monthlyUtilities);
-
-  // Utilities breakdown table
-  if (d.monthlyUtilities.suburbData) {
-    const utilTableId = buildSuburbTableCard(grid, {
-      id: "table-utilities-breakdown",
-      title: d.monthlyUtilities.suburbData.title,
-      sourceName: d.monthlyUtilities.suburbData.source.name,
-      sourceUrl:  d.monthlyUtilities.suburbData.source.url
-    });
-    renderSuburbTable(utilTableId, d.monthlyUtilities.suburbData);
-  }
-
-  // Auto Insurance
-  const insuranceCard = buildChartCardWithAnalysis(grid, {
-    id: "chart-auto-insurance",
-    title: d.annualAutoInsurance.label,
-    sourceName: d.annualAutoInsurance.source.name,
-    sourceUrl:  d.annualAutoInsurance.source.url
-  });
-  renderBarChart(insuranceCard.canvasId, d.annualAutoInsurance);
-  renderAnalysisBlock(insuranceCard.analysisId, d.annualAutoInsurance);
-
   // Transit Options (stat cards)
   const transitIds = buildStatCardContainerWithAnalysis(grid, {
     id: "statcards-transit",
@@ -566,19 +570,37 @@ function renderLifestyleTab() {
   renderStatCards(transitIds.containerId, d.transitDescription);
   renderAnalysisBlock(transitIds.analysisId, d.transitDescription);
 
-  // Vehicle Registration Costs
-  if (ctx && ctx.vehicleCosts) {
-    const vehicleId = buildContextCard(grid, {
-      id: "panel-vehicle-costs",
-      title: ctx.vehicleCosts.label + " (Two Adults, Two $25k Vehicles)",
-      sourceName: ctx.vehicleCosts.source.name,
-      sourceUrl:  ctx.vehicleCosts.source.url,
-      fullWidth: true
-    });
-    renderVehicleCostsPanel(vehicleId, ctx.vehicleCosts);
-  }
+  // Park Land %
+  const parksCard = buildChartCardWithAnalysis(grid, {
+    id: "chart-parks",
+    title: d.parkLandPercent.label,
+    sourceName: d.parkLandPercent.source.name,
+    sourceUrl:  d.parkLandPercent.source.url
+  });
+  renderBarChart(parksCard.canvasId, d.parkLandPercent);
+  renderAnalysisBlock(parksCard.analysisId, d.parkLandPercent);
 
-  // Lifestyle Highlights
+  // Violent Crime Rate
+  const violentCard = buildChartCardWithAnalysis(grid, {
+    id: "chart-violent-crime",
+    title: safety.violentCrimeRate.label,
+    sourceName: safety.violentCrimeRate.source.name,
+    sourceUrl:  safety.violentCrimeRate.source.url
+  });
+  renderBarChart(violentCard.canvasId, safety.violentCrimeRate);
+  renderAnalysisBlock(violentCard.analysisId, safety.violentCrimeRate);
+
+  // Property Crime Rate
+  const propCrimeCard = buildChartCardWithAnalysis(grid, {
+    id: "chart-property-crime",
+    title: safety.propertyCrimeRate.label,
+    sourceName: safety.propertyCrimeRate.source.name,
+    sourceUrl:  safety.propertyCrimeRate.source.url
+  });
+  renderBarChart(propCrimeCard.canvasId, safety.propertyCrimeRate);
+  renderAnalysisBlock(propCrimeCard.analysisId, safety.propertyCrimeRate);
+
+  // Lifestyle Highlights (skiing, BLM, aviation, motorcycle)
   if (ctx && ctx.lifestyleHighlights) {
     const highlightId = buildContextCard(grid, {
       id: "panel-lifestyle-highlights",
@@ -591,7 +613,7 @@ function renderLifestyleTab() {
   }
 
   // Sources
-  const allSources = collectSources(d);
+  const allSources = collectSources({ ...d, ...safety });
   renderSources("sources-list-lifestyle", allSources);
 }
 
@@ -689,6 +711,7 @@ function renderChildcareTab() {
    ---------------------------------------------------------- */
 const TAB_RENDERERS = {
   cost:      { fn: renderCostTab,      rendered: false },
+  expenses:  { fn: renderExpensesTab,  rendered: false },
   climate:   { fn: renderClimateTab,   rendered: false },
   lifestyle: { fn: renderLifestyleTab, rendered: false },
   childcare: { fn: renderChildcareTab, rendered: false }

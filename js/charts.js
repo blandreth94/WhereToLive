@@ -582,6 +582,73 @@ function renderAlcoholLawsPanel(containerId, politicsData) {
 }
 
 /* ----------------------------------------------------------
+   Render a transit options panel with Summary / Full Analysis toggle.
+   Summary = metric.values[city] (short descriptor string)
+   Full Analysis = metric.analysis[city] (qualitative paragraph)
+   ---------------------------------------------------------- */
+function renderTransitPanel(containerId, metric) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const colors = getCityColors();
+  container.innerHTML = "";
+
+  // Toggle bar
+  const toggleBar = document.createElement("div");
+  toggleBar.className = "lifestyle-toggle-bar";
+  toggleBar.innerHTML = `
+    <span class="lifestyle-toggle-label">View:</span>
+    <button class="lifestyle-toggle-btn active" data-view="short">Summary</button>
+    <button class="lifestyle-toggle-btn" data-view="long">Full Analysis</button>
+  `;
+  container.appendChild(toggleBar);
+
+  toggleBar.addEventListener("click", (e) => {
+    const btn = e.target.closest(".lifestyle-toggle-btn");
+    if (!btn) return;
+    const view = btn.dataset.view;
+    toggleBar.querySelectorAll(".lifestyle-toggle-btn").forEach(b => b.classList.toggle("active", b.dataset.view === view));
+    container.querySelectorAll(".transit-view-short").forEach(el => el.style.display = view === "short" ? "" : "none");
+    container.querySelectorAll(".transit-view-long").forEach(el => el.style.display = view === "long" ? "" : "none");
+  });
+
+  // City cards grid
+  const grid = document.createElement("div");
+  grid.className = "politics-panel-grid";
+
+  CITY_DATA.meta.cities.forEach(city => {
+    const summary = metric.values[city.key];
+    const details = metric.analysis && metric.analysis[city.key];
+    if (!summary) return;
+
+    const card = document.createElement("div");
+    card.className = "politics-card";
+    card.style.borderLeftColor = colors[city.key];
+
+    const header = `
+      <div class="politics-card-header">
+        <span class="politics-city-dot" style="background:${colors[city.key]}"></span>
+        <strong>${city.label}</strong>
+      </div>`;
+
+    const shortView = document.createElement("div");
+    shortView.className = "transit-view-short";
+    shortView.innerHTML = header + `<p class="politics-card-full">${summary}</p>`;
+
+    const longView = document.createElement("div");
+    longView.className = "transit-view-long";
+    longView.style.display = "none";
+    longView.innerHTML = header + `<p class="politics-card-full">${details || summary}</p>`;
+
+    card.appendChild(shortView);
+    card.appendChild(longView);
+    grid.appendChild(card);
+  });
+
+  container.appendChild(grid);
+}
+
+/* ----------------------------------------------------------
    Render destination accessibility panel (aviation / airport connectivity)
    Reads aviation / aviationFull from lifestyleHighlights context values.
    Summary / Full Analysis toggle — same pattern as renderAlcoholLawsPanel.

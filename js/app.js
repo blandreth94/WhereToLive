@@ -569,16 +569,15 @@ function renderTravelTab() {
     renderSuburbTable(commuteSuburbId, d.avgCommuteMinutes.suburbData);
   }
 
-  // Transit Options (stat cards)
-  const transitIds = buildStatCardContainerWithAnalysis(grid, {
-    id: "statcards-transit",
+  // Transit Options (summary / full analysis toggle panel)
+  const transitId = buildContextCard(grid, {
+    id: "panel-transit",
     title: d.transitDescription.label,
     sourceName: d.transitDescription.source.name,
     sourceUrl:  d.transitDescription.source.url,
     fullWidth: true
   });
-  renderStatCards(transitIds.containerId, d.transitDescription);
-  renderAnalysisBlock(transitIds.analysisId, d.transitDescription);
+  renderTransitPanel(transitId, d.transitDescription);
 
   // Destination Accessibility (aviation)
   if (ctx && ctx.lifestyleHighlights) {

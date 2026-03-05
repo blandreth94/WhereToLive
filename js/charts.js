@@ -1090,10 +1090,12 @@ function renderHubProfiles(containerId, data) {
 
     card.innerHTML = `
       <div class="hub-profile-header">
-        <span class="hub-city-dot" style="background:${colors[city.key]}"></span>
-        <div>
-          <div class="hub-airport-name">${profile.airportCode} — ${city.label}</div>
-          <div class="hub-airport-sub">${profile.airportName}</div>
+        <div class="hub-profile-header-top">
+          <span class="hub-city-dot" style="background:${colors[city.key]}"></span>
+          <div>
+            <div class="hub-airport-name">${profile.airportCode} — ${city.label}</div>
+            <div class="hub-airport-sub">${profile.airportName}</div>
+          </div>
         </div>
         <span class="hub-airport-badge">${profile.airportType}</span>
       </div>

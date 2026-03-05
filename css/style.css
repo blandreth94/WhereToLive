@@ -1072,17 +1072,25 @@ table.data-table td.highlight-bad {
   white-space: nowrap;
   color: var(--text-base);
 }
+/* Sticky corner cell — fixed in both axes */
 .conn-table thead th:first-child {
+  position: sticky;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  background: var(--bg-page);
   text-align: left;
   min-width: 110px;
 }
 
-/* Sticky origin column */
+/* Sticky origin column
+   z-index: 4 keeps it above cells that gain a new stacking context
+   from filter: brightness() on hover */
 .conn-table tbody tr td:first-child {
   position: sticky;
   left: 0;
   background: var(--bg-card);
-  z-index: 2;
+  z-index: 4;
   font-weight: 600;
   font-size: 0.75rem;
   padding: 8px 10px;
@@ -1367,8 +1375,8 @@ table.data-table td.highlight-bad {
 
 .hub-profiles-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--space-md);
+  grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+  gap: var(--space-lg);
   margin-top: var(--space-sm);
 }
 
@@ -1384,35 +1392,41 @@ table.data-table td.highlight-bad {
 
 .hub-profile-header {
   display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  padding: var(--space-md) var(--space-md);
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-md);
   border-bottom: 1px solid var(--border);
 }
+.hub-profile-header-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
 .hub-city-dot {
-  width: 12px;
-  height: 12px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 .hub-airport-name {
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--text-heading);
   line-height: 1.2;
 }
 .hub-airport-sub {
-  font-size: 0.68rem;
+  font-size: 0.74rem;
   color: var(--text-muted);
-  margin-top: 1px;
+  margin-top: 2px;
 }
+/* Badge sits below the name row, left-aligned */
 .hub-airport-badge {
-  margin-left: auto;
+  align-self: flex-start;
   background: var(--bg-alt);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 2px 8px;
-  font-size: 0.64rem;
+  padding: 3px 10px;
+  font-size: 0.66rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -1430,43 +1444,43 @@ table.data-table td.highlight-bad {
   flex-wrap: wrap;
 }
 .hub-fare-label {
-  font-size: 0.62rem;
+  font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-muted);
 }
 .hub-fare-value {
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--text-heading);
 }
 .hub-fare-note {
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
   flex-basis: 100%;
-  line-height: 1.45;
-  margin-top: 1px;
+  line-height: 1.5;
+  margin-top: 2px;
 }
 
+/* Lists stack vertically — strengths above gaps, full width */
 .hub-lists {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0;
+  display: flex;
+  flex-direction: column;
   flex: 1;
 }
 .hub-list-col {
-  padding: var(--space-sm) var(--space-md);
+  padding: var(--space-md);
 }
 .hub-list-col:first-child {
-  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 .hub-list-title {
-  font-size: 0.62rem;
+  font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  margin-bottom: var(--space-xs);
+  margin-bottom: var(--space-sm);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -1479,22 +1493,22 @@ table.data-table td.highlight-bad {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 .hub-list-col ul li {
-  font-size: 0.71rem;
+  font-size: 0.8rem;
   color: var(--text-base);
-  line-height: 1.4;
-  padding-left: 14px;
+  line-height: 1.5;
+  padding-left: 16px;
   position: relative;
 }
 .hub-list-col ul li::before {
   content: "";
   position: absolute;
   left: 0;
-  top: 6px;
-  width: 6px;
-  height: 6px;
+  top: 7px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
 }
 .hub-list-col.strengths-col ul li::before { background: #4caf50; }
@@ -1528,21 +1542,10 @@ table.data-table td.highlight-bad {
 
 .hub-toggle-content {
   display: none;
-  padding: var(--space-sm) var(--space-md);
-  font-size: 0.78rem;
+  padding: var(--space-md);
+  font-size: 0.83rem;
   color: var(--text-base);
-  line-height: 1.65;
+  line-height: 1.7;
   border-top: 1px solid var(--border);
 }
 .hub-toggle-content.visible { display: block; }
-
-/* Responsive: hub list columns stack on narrow */
-@media (max-width: 540px) {
-  .hub-lists {
-    grid-template-columns: 1fr;
-  }
-  .hub-list-col:first-child {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-}

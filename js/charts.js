@@ -529,7 +529,10 @@ function renderLifestyleHighlights(containerId, contextData) {
   container.innerHTML = "";
 
   // Global short/long toggle — only shown once, above all cities
-  const hasFullAnalysis = CITY_DATA.meta.cities.some(city => contextData.values[city.key] && contextData.values[city.key].fullAnalysis);
+  const hasFullAnalysis = CITY_DATA.meta.cities.some(city => {
+    const v = contextData.values[city.key];
+    return v && (v.skiingFull || v.blmFull || v.aviationFull || v.motorcycleFull);
+  });
   if (hasFullAnalysis) {
     const toggleBar = document.createElement("div");
     toggleBar.className = "lifestyle-toggle-bar";

@@ -548,17 +548,6 @@ function renderLifestyleTab() {
   renderHorizontalBarChart(commuteCard.canvasId, d.avgCommuteMinutes);
   renderAnalysisBlock(commuteCard.analysisId, d.avgCommuteMinutes);
 
-  // Commute context by suburb
-  if (d.avgCommuteMinutes.suburbData) {
-    const commuteSuburbId = buildSuburbTableCard(grid, {
-      id: "table-commute-suburbs",
-      title: d.avgCommuteMinutes.suburbData.title,
-      sourceName: d.avgCommuteMinutes.suburbData.source.name,
-      sourceUrl:  d.avgCommuteMinutes.suburbData.source.url
-    });
-    renderSuburbTable(commuteSuburbId, d.avgCommuteMinutes.suburbData);
-  }
-
   // Transit Options (stat cards)
   const transitIds = buildStatCardContainerWithAnalysis(grid, {
     id: "statcards-transit",

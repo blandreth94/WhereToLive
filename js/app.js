@@ -580,26 +580,6 @@ function renderLifestyleTab() {
   renderBarChart(parksCard.canvasId, d.parkLandPercent);
   renderAnalysisBlock(parksCard.analysisId, d.parkLandPercent);
 
-  // Violent Crime Rate
-  const violentCard = buildChartCardWithAnalysis(grid, {
-    id: "chart-violent-crime",
-    title: safety.violentCrimeRate.label,
-    sourceName: safety.violentCrimeRate.source.name,
-    sourceUrl:  safety.violentCrimeRate.source.url
-  });
-  renderBarChart(violentCard.canvasId, safety.violentCrimeRate);
-  renderAnalysisBlock(violentCard.analysisId, safety.violentCrimeRate);
-
-  // Property Crime Rate
-  const propCrimeCard = buildChartCardWithAnalysis(grid, {
-    id: "chart-property-crime",
-    title: safety.propertyCrimeRate.label,
-    sourceName: safety.propertyCrimeRate.source.name,
-    sourceUrl:  safety.propertyCrimeRate.source.url
-  });
-  renderBarChart(propCrimeCard.canvasId, safety.propertyCrimeRate);
-  renderAnalysisBlock(propCrimeCard.analysisId, safety.propertyCrimeRate);
-
   // Lifestyle Highlights (skiing, BLM, aviation, motorcycle)
   if (ctx && ctx.lifestyleHighlights) {
     const highlightId = buildContextCard(grid, {
@@ -613,7 +593,7 @@ function renderLifestyleTab() {
   }
 
   // Sources
-  const allSources = collectSources({ ...d, ...safety });
+  const allSources = collectSources(d);
   renderSources("sources-list-lifestyle", allSources);
 }
 
@@ -707,6 +687,73 @@ function renderChildcareTab() {
 }
 
 /* ----------------------------------------------------------
+   RENDER: Politics, Law & Regulatory Environment Tab
+   (Crime, Employment Law, Firearms)
+   ---------------------------------------------------------- */
+function renderPoliticsTab() {
+  const p      = CITY_DATA.politics;
+  const safety = CITY_DATA.safety;
+  const grid   = "charts-politics";
+
+  // Crime overview section divider
+  buildSectionDivider(grid, "Crime & Public Safety");
+
+  // Violent Crime Rate
+  const violentCard = buildChartCardWithAnalysis(grid, {
+    id: "chart-violent-crime",
+    title: safety.violentCrimeRate.label,
+    sourceName: safety.violentCrimeRate.source.name,
+    sourceUrl:  safety.violentCrimeRate.source.url
+  });
+  renderBarChart(violentCard.canvasId, safety.violentCrimeRate);
+  renderAnalysisBlock(violentCard.analysisId, safety.violentCrimeRate);
+
+  // Property Crime Rate
+  const propCrimeCard = buildChartCardWithAnalysis(grid, {
+    id: "chart-property-crime",
+    title: safety.propertyCrimeRate.label,
+    sourceName: safety.propertyCrimeRate.source.name,
+    sourceUrl:  safety.propertyCrimeRate.source.url
+  });
+  renderBarChart(propCrimeCard.canvasId, safety.propertyCrimeRate);
+  renderAnalysisBlock(propCrimeCard.analysisId, safety.propertyCrimeRate);
+
+  // Employment Law section
+  buildSectionDivider(grid, "Employment Law & Worker Protections");
+
+  if (p && p.employmentLaw) {
+    const empLawId = buildContextCard(grid, {
+      id: "panel-employment-law",
+      title: p.employmentLaw.label,
+      sourceName: p.employmentLaw.source.name,
+      sourceUrl:  p.employmentLaw.source.url,
+      fullWidth: true
+    });
+    renderPoliticsPanel(empLawId, p.employmentLaw);
+  }
+
+  // Firearms Law section
+  buildSectionDivider(grid, "Firearms Laws & 2nd Amendment Environment");
+
+  if (p && p.firearmsLaw) {
+    const firearmsId = buildContextCard(grid, {
+      id: "panel-firearms-law",
+      title: p.firearmsLaw.label,
+      sourceName: p.firearmsLaw.source.name,
+      sourceUrl:  p.firearmsLaw.source.url,
+      fullWidth: true
+    });
+    renderPoliticsPanel(firearmsId, p.firearmsLaw);
+  }
+
+  // Sources
+  const allSources = collectSources(safety);
+  if (p && p.employmentLaw) allSources.push({ name: p.employmentLaw.source.name, url: p.employmentLaw.source.url });
+  if (p && p.firearmsLaw)   allSources.push({ name: p.firearmsLaw.source.name,   url: p.firearmsLaw.source.url });
+  renderSources("sources-list-politics", allSources);
+}
+
+/* ----------------------------------------------------------
    Tab switching logic
    ---------------------------------------------------------- */
 const TAB_RENDERERS = {
@@ -714,7 +761,8 @@ const TAB_RENDERERS = {
   expenses:  { fn: renderExpensesTab,  rendered: false },
   climate:   { fn: renderClimateTab,   rendered: false },
   lifestyle: { fn: renderLifestyleTab, rendered: false },
-  childcare: { fn: renderChildcareTab, rendered: false }
+  childcare: { fn: renderChildcareTab, rendered: false },
+  politics:  { fn: renderPoliticsTab,  rendered: false }
 };
 
 function switchTab(tabKey) {

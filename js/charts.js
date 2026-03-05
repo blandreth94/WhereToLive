@@ -479,7 +479,50 @@ function renderVehicleCostsPanel(containerId, contextData) {
 }
 
 /* ----------------------------------------------------------
-   Render lifestyle highlights panel
+   Render a politics/law panel (employment law or firearms)
+   Each city gets a card with summary + expandable full text
+   ---------------------------------------------------------- */
+function renderPoliticsPanel(containerId, politicsData) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const colors = getCityColors();
+  container.innerHTML = "";
+
+  const grid = document.createElement("div");
+  grid.className = "politics-panel-grid";
+
+  CITY_DATA.meta.cities.forEach(city => {
+    const d = politicsData.values[city.key];
+    if (!d) return;
+
+    const card = document.createElement("div");
+    card.className = "politics-card";
+    card.style.borderLeftColor = colors[city.key];
+
+    const detailsId = containerId + "-" + city.key + "-details";
+
+    card.innerHTML = `
+      <div class="politics-card-header">
+        <span class="politics-city-dot" style="background:${colors[city.key]}"></span>
+        <strong>${city.label}</strong>
+      </div>
+      <p class="politics-card-summary">${d.summary}</p>
+      ${d.details ? `
+      <details class="politics-details">
+        <summary>Full Analysis</summary>
+        <p class="politics-card-full">${d.details}</p>
+      </details>` : ""}
+    `;
+
+    grid.appendChild(card);
+  });
+
+  container.appendChild(grid);
+}
+
+/* ----------------------------------------------------------
+   Render lifestyle highlights panel (with optional full analysis expand)
    ---------------------------------------------------------- */
 function renderLifestyleHighlights(containerId, contextData) {
   const container = document.getElementById(containerId);
@@ -501,22 +544,27 @@ function renderLifestyleHighlights(containerId, contextData) {
       </div>
       <div class="lifestyle-highlights-grid">
         <div class="highlight-item">
-          <div class="highlight-label">⛷️ Skiing Access</div>
+          <div class="highlight-label">Skiing Access</div>
           <div class="highlight-text">${d.skiing}</div>
         </div>
         <div class="highlight-item">
-          <div class="highlight-label">🏕️ BLM / Public Land</div>
+          <div class="highlight-label">BLM / Public Land</div>
           <div class="highlight-text">${d.blm}</div>
         </div>
         <div class="highlight-item">
-          <div class="highlight-label">✈️ Aviation (SoCal)</div>
+          <div class="highlight-label">Aviation (SoCal)</div>
           <div class="highlight-text">${d.aviation}</div>
         </div>
         <div class="highlight-item">
-          <div class="highlight-label">🏍️ Motorcycle Culture</div>
+          <div class="highlight-label">Motorcycle Culture</div>
           <div class="highlight-text">${d.motorcycle}</div>
         </div>
       </div>
+      ${d.fullAnalysis ? `
+      <details class="lifestyle-full-analysis">
+        <summary>Full Qualitative Analysis</summary>
+        <p class="lifestyle-full-analysis-text">${d.fullAnalysis}</p>
+      </details>` : ""}
     `;
     container.appendChild(section);
   });

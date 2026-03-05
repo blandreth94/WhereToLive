@@ -1072,8 +1072,10 @@ table.data-table td.highlight-bad {
   white-space: nowrap;
   color: var(--text-base);
 }
-/* Sticky corner cell — fixed in both axes */
-.conn-table thead th:first-child {
+/* Sticky corner cell — fixed in both axes.
+   Scope to conn-group-header row only; conn-dest-header's first th
+   ("Roanoke" destination) must NOT also get left:0 or it collides. */
+.conn-table thead tr.conn-group-header th:first-child {
   position: sticky;
   left: 0;
   top: 0;
@@ -1136,18 +1138,25 @@ table.data-table td.highlight-bad {
   min-height: 48px;
   cursor: pointer;
   border-radius: 0;
-  transition: filter 0.12s, opacity 0.12s;
+  /* position:relative needed for ::after overlay */
+  position: relative;
   user-select: none;
 }
-.conn-cell:hover {
-  filter: brightness(0.88);
+/* Hover darkening via ::after overlay — avoids filter: brightness()
+   which creates a stacking context and lets cells pop over the sticky column */
+.conn-cell:hover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.08);
+  pointer-events: none;
 }
 .conn-cell-self {
   cursor: default;
   background: var(--bg-alt);
 }
-.conn-cell-self:hover {
-  filter: none;
+.conn-cell-self:hover::after {
+  display: none;
 }
 
 /* Cell type colour fills */

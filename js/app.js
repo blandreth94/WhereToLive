@@ -591,6 +591,31 @@ function renderTravelTab() {
     renderDestinationAccessibility(destId, ctx.lifestyleHighlights);
   }
 
+  // ---- Connectivity Matrix ----
+  if (CITY_DATA.connectivity) {
+    const conn = CITY_DATA.connectivity;
+
+    buildSectionDivider(grid, "City-to-City &amp; Destination Connectivity");
+
+    const matrixId = buildContextCard(grid, {
+      id: "panel-connectivity-matrix",
+      title: "Flight &amp; Travel Connectivity Matrix",
+      sourceName: conn.source.name,
+      sourceUrl:  conn.source.url,
+      fullWidth: true
+    });
+    renderConnectivityMatrix(matrixId, conn);
+
+    const hubId = buildContextCard(grid, {
+      id: "panel-hub-profiles",
+      title: "Airport Hub Profiles",
+      sourceName: conn.source.name,
+      sourceUrl:  conn.source.url,
+      fullWidth: true
+    });
+    renderHubProfiles(hubId, conn);
+  }
+
   // Sources
   const travelSources = collectSources({
     avgCommuteMinutes:  d.avgCommuteMinutes,
@@ -598,6 +623,9 @@ function renderTravelTab() {
   });
   if (ctx && ctx.lifestyleHighlights) {
     travelSources.push({ name: ctx.lifestyleHighlights.source.name, url: ctx.lifestyleHighlights.source.url });
+  }
+  if (CITY_DATA.connectivity) {
+    travelSources.push({ name: CITY_DATA.connectivity.source.name, url: CITY_DATA.connectivity.source.url });
   }
   renderSources("sources-list-travel", travelSources);
 }

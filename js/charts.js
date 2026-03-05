@@ -814,3 +814,326 @@ function renderLifestyleHighlights(containerId, contextData) {
     container.appendChild(section);
   });
 }
+
+/* ----------------------------------------------------------
+   CONNECTIVITY MATRIX
+   ---------------------------------------------------------- */
+
+const CONN_TYPE_META = {
+  direct:     { icon: "✈",     label: "Direct",      cls: "conn-cell-direct" },
+  upcoming:   { icon: "✈",     label: "Coming Soon", cls: "conn-cell-upcoming" },
+  seasonal:   { icon: "✈",     label: "Seasonal",    cls: "conn-cell-seasonal" },
+  connecting: { icon: "✈",     label: "Connecting",  cls: "conn-cell-connecting" },
+  drive:      { icon: "🚗",    label: "Drive",       cls: "conn-cell-drive" },
+  amtrak:     { icon: "🚆",    label: "Amtrak",      cls: "conn-cell-amtrak" },
+  mixed:      { icon: "✈/🚆", label: "Multi",        cls: "conn-cell-mixed" },
+  self:       { icon: "—",     label: "",            cls: "conn-cell-self" },
+};
+
+function renderConnectivityMatrix(containerId, data) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const colors = getCityColors();
+  const cities = CITY_DATA.meta.cities;
+
+  // Build flat destination list; track which keys start a new group
+  const groups = data.destinations;
+  const flatDests = groups.flatMap(g => g.items);
+  const groupStartKeys = new Set();
+  let colIdx = 0;
+  groups.forEach(g => {
+    if (colIdx > 0) groupStartKeys.add(g.items[0].key);
+    colIdx += g.items.length;
+  });
+
+  // ---- Build <table> ----
+  const table = document.createElement("table");
+  table.className = "conn-table";
+
+  const thead = document.createElement("thead");
+
+  // Row 1: group headers (with col spans)
+  const groupRow = document.createElement("tr");
+  groupRow.className = "conn-group-header";
+  const corner = document.createElement("th");
+  corner.rowSpan = 2;
+  corner.style.cssText = "text-align:left;font-size:0.62rem;color:var(--text-muted);padding:6px 10px;";
+  corner.textContent = "Origin ↓ / Destination →";
+  groupRow.appendChild(corner);
+  groups.forEach(g => {
+    const th = document.createElement("th");
+    th.colSpan = g.items.length;
+    th.textContent = g.group;
+    if (groupStartKeys.has(g.items[0].key)) th.classList.add("conn-group-start");
+    groupRow.appendChild(th);
+  });
+  thead.appendChild(groupRow);
+
+  // Row 2: individual destination labels
+  const destRow = document.createElement("tr");
+  destRow.className = "conn-dest-header";
+  flatDests.forEach(dest => {
+    const th = document.createElement("th");
+    th.textContent = dest.label;
+    if (groupStartKeys.has(dest.key)) th.classList.add("conn-group-start");
+    destRow.appendChild(th);
+  });
+  thead.appendChild(destRow);
+  table.appendChild(thead);
+
+  // Body: one row per origin city
+  const tbody = document.createElement("tbody");
+  cities.forEach(city => {
+    const tr = document.createElement("tr");
+
+    // Sticky origin label
+    const td0 = document.createElement("td");
+    td0.innerHTML = `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${colors[city.key]};margin-right:6px;vertical-align:middle;flex-shrink:0"></span>${city.label}`;
+    tr.appendChild(td0);
+
+    flatDests.forEach(dest => {
+      const td = document.createElement("td");
+      if (groupStartKeys.has(dest.key)) td.classList.add("conn-group-start");
+
+      const cellData = (data.matrix[city.key] || {})[dest.key];
+      const type = cellData ? cellData.type : "self";
+      const meta = CONN_TYPE_META[type] || CONN_TYPE_META.connecting;
+
+      if (!cellData || type === "self") {
+        const selfDiv = document.createElement("div");
+        selfDiv.className = "conn-cell conn-cell-self";
+        selfDiv.innerHTML = `<span class="conn-cell-icon">—</span>`;
+        td.appendChild(selfDiv);
+        tr.appendChild(td);
+        return;
+      }
+
+      const timeHtml = cellData.time
+        ? `<span class="conn-cell-time">${cellData.time.replace(/^~/, "≈")}</span>`
+        : "";
+
+      const div = document.createElement("div");
+      div.className = `conn-cell ${meta.cls}`;
+      div.setAttribute("role", "button");
+      div.setAttribute("tabindex", "0");
+      div.setAttribute("aria-label", `${city.label} to ${dest.label}: ${meta.label}`);
+      div.innerHTML = `
+        <span class="conn-cell-icon">${meta.icon}</span>
+        <span class="conn-cell-label">${meta.label}</span>
+        ${timeHtml}
+      `;
+
+      div.addEventListener("click", () => showConnectivityModal(city, dest, cellData, colors));
+      div.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          showConnectivityModal(city, dest, cellData, colors);
+        }
+      });
+
+      td.appendChild(div);
+      tr.appendChild(td);
+    });
+
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+
+  // Scrollable wrapper
+  const wrapper = document.createElement("div");
+  wrapper.className = "connectivity-table-wrapper";
+  wrapper.appendChild(table);
+  container.appendChild(wrapper);
+
+  // Legend
+  const legendDefs = [
+    { key: "direct",     label: "Nonstop direct flight" },
+    { key: "upcoming",   label: "Nonstop launching soon" },
+    { key: "seasonal",   label: "Seasonal nonstop" },
+    { key: "connecting", label: "Connecting flight(s)" },
+    { key: "drive",      label: "Drive recommended" },
+    { key: "amtrak",     label: "Amtrak rail" },
+    { key: "mixed",      label: "Multiple options (fly + rail)" },
+  ];
+  const legend = document.createElement("div");
+  legend.className = "conn-legend";
+  legendDefs.forEach(lt => {
+    const item = document.createElement("div");
+    item.className = "conn-legend-item";
+    item.innerHTML = `<span class="conn-legend-swatch conn-legend-swatch-${lt.key}"></span>${lt.label}`;
+    legend.appendChild(item);
+  });
+  container.appendChild(legend);
+}
+
+/* ----------------------------------------------------------
+   CONNECTIVITY MODAL
+   ---------------------------------------------------------- */
+
+function showConnectivityModal(originCity, destDef, cellData, colors) {
+  // Remove any existing modal
+  const existing = document.getElementById("conn-modal-overlay");
+  if (existing) existing.remove();
+
+  const TYPE_LABELS = {
+    direct:     "Nonstop Direct",
+    upcoming:   "Nonstop — Launching Soon",
+    seasonal:   "Seasonal Nonstop",
+    connecting: "Connecting Flight(s)",
+    drive:      "Drive Recommended",
+    amtrak:     "Amtrak Rail",
+    mixed:      "Multiple Options",
+  };
+  const typeLabel = TYPE_LABELS[cellData.type] || cellData.type;
+
+  const originDot = `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${colors[originCity.key]};margin-right:5px;vertical-align:middle;flex-shrink:0"></span>`;
+
+  // Meta row
+  let metaHtml = "";
+  if (cellData.time) metaHtml += `<div class="conn-modal-meta-item"><span class="conn-modal-meta-label">Est. Time</span><span class="conn-modal-meta-value">${cellData.time}</span></div>`;
+  if (cellData.fare) metaHtml += `<div class="conn-modal-meta-item"><span class="conn-modal-meta-label">Typical Fare</span><span class="conn-modal-meta-value">${cellData.fare}</span></div>`;
+  if (cellData.note) metaHtml += `<div class="conn-modal-meta-item" style="flex-basis:100%"><span class="conn-modal-meta-label">Note</span><span class="conn-modal-meta-value" style="font-weight:400;font-size:0.78rem">${cellData.note}</span></div>`;
+
+  const sourceHtml = cellData.source
+    ? `<div class="conn-modal-source">Source: <a href="${cellData.source.url}" target="_blank" rel="noopener">${cellData.source.name}</a></div>`
+    : "";
+
+  const detailsHtml = cellData.details
+    ? `<button class="conn-modal-details-toggle" aria-expanded="false">▸ Show full analysis</button>
+       <div class="conn-modal-details-text" style="display:none">${cellData.details}</div>`
+    : "";
+
+  const overlay = document.createElement("div");
+  overlay.id = "conn-modal-overlay";
+  overlay.className = "conn-modal-overlay";
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-modal", "true");
+  overlay.innerHTML = `
+    <div class="conn-modal" role="document">
+      <div class="conn-modal-header">
+        <div>
+          <div class="conn-modal-title">${originDot}${originCity.label} → ${destDef.label}</div>
+          <div class="conn-modal-subtitle">Connectivity Overview</div>
+        </div>
+        <button class="conn-modal-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="conn-modal-type-badge ${cellData.type}">${typeLabel}</div>
+      ${metaHtml ? `<div class="conn-modal-meta">${metaHtml}</div>` : ""}
+      <div class="conn-modal-body">
+        <p class="conn-modal-summary">${cellData.summary || ""}</p>
+        ${detailsHtml}
+        ${sourceHtml}
+      </div>
+    </div>
+  `;
+
+  // Close on backdrop click
+  overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+
+  // Close button
+  overlay.querySelector(".conn-modal-close").addEventListener("click", () => overlay.remove());
+
+  // Details toggle
+  const toggleBtn = overlay.querySelector(".conn-modal-details-toggle");
+  if (toggleBtn) {
+    const detailsEl = overlay.querySelector(".conn-modal-details-text");
+    toggleBtn.addEventListener("click", () => {
+      const isOpen = detailsEl.style.display !== "none";
+      detailsEl.style.display = isOpen ? "none" : "block";
+      toggleBtn.textContent = isOpen ? "▸ Show full analysis" : "▾ Hide full analysis";
+      toggleBtn.setAttribute("aria-expanded", String(!isOpen));
+    });
+  }
+
+  // Escape key closes modal
+  const escHandler = e => {
+    if (e.key === "Escape") {
+      overlay.remove();
+      document.removeEventListener("keydown", escHandler);
+    }
+  };
+  document.addEventListener("keydown", escHandler);
+
+  document.body.appendChild(overlay);
+
+  // Focus the close button for accessibility
+  const closeBtn = overlay.querySelector(".conn-modal-close");
+  if (closeBtn) closeBtn.focus();
+}
+
+/* ----------------------------------------------------------
+   HUB PROFILE CARDS
+   ---------------------------------------------------------- */
+
+function renderHubProfiles(containerId, data) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const colors = getCityColors();
+  const cities = CITY_DATA.meta.cities;
+
+  const grid = document.createElement("div");
+  grid.className = "hub-profiles-grid";
+
+  cities.forEach(city => {
+    const profile = data.hubProfiles[city.key];
+    if (!profile) return;
+
+    const card = document.createElement("div");
+    card.className = "hub-profile-card";
+
+    const fareValueHtml = profile.btsFare
+      ? `<span class="hub-fare-value">$${profile.btsFare}</span>`
+      : `<span class="hub-fare-value" style="font-size:0.78rem;font-weight:500;color:var(--text-muted)">N/A</span>`;
+
+    const strengthsHtml = (profile.strengths || []).map(s => `<li>${s}</li>`).join("");
+    const gapsHtml      = (profile.gaps || []).map(g => `<li>${g}</li>`).join("");
+
+    card.innerHTML = `
+      <div class="hub-profile-header">
+        <span class="hub-city-dot" style="background:${colors[city.key]}"></span>
+        <div>
+          <div class="hub-airport-name">${profile.airportCode} — ${city.label}</div>
+          <div class="hub-airport-sub">${profile.airportName}</div>
+        </div>
+        <span class="hub-airport-badge">${profile.airportType}</span>
+      </div>
+      <div class="hub-fare-row">
+        <span class="hub-fare-label">BTS Avg Fare</span>
+        ${fareValueHtml}
+        <span class="hub-fare-note">${profile.btsFareNote || ""}</span>
+      </div>
+      <div class="hub-lists">
+        <div class="hub-list-col strengths-col">
+          <div class="hub-list-title strengths">✓ Strengths</div>
+          <ul>${strengthsHtml}</ul>
+        </div>
+        <div class="hub-list-col gaps-col">
+          <div class="hub-list-title gaps">✗ Gaps</div>
+          <ul>${gapsHtml}</ul>
+        </div>
+      </div>
+      <div class="hub-toggle-bar">
+        <button class="hub-toggle-btn active" data-panel="summary">Summary</button>
+        <button class="hub-toggle-btn" data-panel="details">Full Analysis</button>
+      </div>
+      <div class="hub-toggle-content visible">${profile.summary || ""}</div>
+      <div class="hub-toggle-content">${profile.details || ""}</div>
+    `;
+
+    // Toggle
+    const btns   = card.querySelectorAll(".hub-toggle-btn");
+    const panels = card.querySelectorAll(".hub-toggle-content");
+    btns.forEach((btn, i) => {
+      btn.addEventListener("click", () => {
+        btns.forEach(b => b.classList.remove("active"));
+        panels.forEach(p => p.classList.remove("visible"));
+        btn.classList.add("active");
+        panels[i].classList.add("visible");
+      });
+    });
+
+    grid.appendChild(card);
+  });
+
+  container.appendChild(grid);
+}

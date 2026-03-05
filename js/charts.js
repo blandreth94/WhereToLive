@@ -507,12 +507,7 @@ function renderPoliticsPanel(containerId, politicsData) {
         <span class="politics-city-dot" style="background:${colors[city.key]}"></span>
         <strong>${city.label}</strong>
       </div>
-      <p class="politics-card-summary">${d.summary}</p>
-      ${d.details ? `
-      <details class="politics-details">
-        <summary>Full Analysis</summary>
-        <p class="politics-card-full">${d.details}</p>
-      </details>` : ""}
+      <p class="politics-card-full">${d.details || d.summary}</p>
     `;
 
     grid.appendChild(card);
@@ -522,7 +517,9 @@ function renderPoliticsPanel(containerId, politicsData) {
 }
 
 /* ----------------------------------------------------------
-   Render lifestyle highlights panel (with optional full analysis expand)
+   Render lifestyle highlights panel
+   Toggle between short (4-category grid) and long (full analysis
+   with categories preserved as named sections)
    ---------------------------------------------------------- */
 function renderLifestyleHighlights(containerId, contextData) {
   const container = document.getElementById(containerId);
@@ -531,13 +528,39 @@ function renderLifestyleHighlights(containerId, contextData) {
   const colors = getCityColors();
   container.innerHTML = "";
 
+  // Global short/long toggle — only shown once, above all cities
+  const hasFullAnalysis = CITY_DATA.meta.cities.some(city => contextData.values[city.key] && contextData.values[city.key].fullAnalysis);
+  if (hasFullAnalysis) {
+    const toggleBar = document.createElement("div");
+    toggleBar.className = "lifestyle-toggle-bar";
+    toggleBar.innerHTML = `
+      <span class="lifestyle-toggle-label">View:</span>
+      <button class="lifestyle-toggle-btn active" data-view="short">Summary</button>
+      <button class="lifestyle-toggle-btn" data-view="long">Full Analysis</button>
+    `;
+    container.appendChild(toggleBar);
+
+    toggleBar.addEventListener("click", (e) => {
+      const btn = e.target.closest(".lifestyle-toggle-btn");
+      if (!btn) return;
+      const view = btn.dataset.view;
+      toggleBar.querySelectorAll(".lifestyle-toggle-btn").forEach(b => b.classList.toggle("active", b.dataset.view === view));
+      container.querySelectorAll(".lifestyle-view-short").forEach(el => el.style.display = view === "short" ? "" : "none");
+      container.querySelectorAll(".lifestyle-view-long").forEach(el => el.style.display = view === "long" ? "" : "none");
+    });
+  }
+
   CITY_DATA.meta.cities.forEach(city => {
     const d = contextData.values[city.key];
     if (!d) return;
 
     const section = document.createElement("div");
     section.className = "lifestyle-highlights-city";
-    section.innerHTML = `
+
+    // Short view (4-category grid)
+    const shortView = document.createElement("div");
+    shortView.className = "lifestyle-view-short";
+    shortView.innerHTML = `
       <div class="lifestyle-city-header" style="border-left-color:${colors[city.key]}">
         <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${colors[city.key]};margin-right:8px;vertical-align:middle;flex-shrink:0"></span>
         <strong>${city.label}</strong>
@@ -560,12 +583,42 @@ function renderLifestyleHighlights(containerId, contextData) {
           <div class="highlight-text">${d.motorcycle}</div>
         </div>
       </div>
-      ${d.fullAnalysis ? `
-      <details class="lifestyle-full-analysis">
-        <summary>Full Qualitative Analysis</summary>
-        <p class="lifestyle-full-analysis-text">${d.fullAnalysis}</p>
-      </details>` : ""}
     `;
+
+    // Long view (full analysis with 4-category structure + paragraph)
+    const longView = document.createElement("div");
+    longView.className = "lifestyle-view-long";
+    longView.style.display = "none";
+    longView.innerHTML = `
+      <div class="lifestyle-city-header" style="border-left-color:${colors[city.key]}">
+        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${colors[city.key]};margin-right:8px;vertical-align:middle;flex-shrink:0"></span>
+        <strong>${city.label}</strong>
+      </div>
+      <div class="lifestyle-highlights-grid" style="margin-bottom:var(--space-md)">
+        <div class="highlight-item">
+          <div class="highlight-label">Skiing Access</div>
+          <div class="highlight-text">${d.skiing}</div>
+        </div>
+        <div class="highlight-item">
+          <div class="highlight-label">BLM / Public Land</div>
+          <div class="highlight-text">${d.blm}</div>
+        </div>
+        <div class="highlight-item">
+          <div class="highlight-label">Aviation (SoCal)</div>
+          <div class="highlight-text">${d.aviation}</div>
+        </div>
+        <div class="highlight-item">
+          <div class="highlight-label">Motorcycle Culture</div>
+          <div class="highlight-text">${d.motorcycle}</div>
+        </div>
+      </div>
+      ${d.fullAnalysis ? `
+      <div class="lifestyle-full-analysis-text lifestyle-full-analysis-block">${d.fullAnalysis}</div>
+      ` : ""}
+    `;
+
+    section.appendChild(shortView);
+    section.appendChild(longView);
     container.appendChild(section);
   });
 }

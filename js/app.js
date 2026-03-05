@@ -687,19 +687,44 @@ function renderChildcareTab() {
 }
 
 /* ----------------------------------------------------------
+   Helper: append a section heading + inner grid to a parent container
+   Returns the inner grid element ID for appending cards into
+   ---------------------------------------------------------- */
+function buildPoliticsSection(parentId, label) {
+  const parent = document.getElementById(parentId);
+  if (!parent) return null;
+
+  const section = document.createElement("div");
+  section.className = "politics-section";
+
+  const heading = document.createElement("div");
+  heading.className = "politics-section-heading";
+  heading.textContent = label;
+
+  const innerGrid = document.createElement("div");
+  innerGrid.className = "politics-inner-grid";
+  const innerId = "politics-inner-" + label.replace(/[^a-z0-9]/gi, "-").toLowerCase();
+  innerGrid.id = innerId;
+
+  section.appendChild(heading);
+  section.appendChild(innerGrid);
+  parent.appendChild(section);
+  return innerId;
+}
+
+/* ----------------------------------------------------------
    RENDER: Politics, Law & Regulatory Environment Tab
    (Crime, Employment Law, Firearms)
    ---------------------------------------------------------- */
 function renderPoliticsTab() {
   const p      = CITY_DATA.politics;
   const safety = CITY_DATA.safety;
-  const grid   = "charts-politics";
+  const outerGrid = "charts-politics";
 
-  // Crime overview section divider
-  buildSectionDivider(grid, "Crime & Public Safety");
+  // --- Crime & Public Safety ---
+  const crimeGrid = buildPoliticsSection(outerGrid, "Crime & Public Safety");
 
-  // Violent Crime Rate
-  const violentCard = buildChartCardWithAnalysis(grid, {
+  const violentCard = buildChartCardWithAnalysis(crimeGrid, {
     id: "chart-violent-crime",
     title: safety.violentCrimeRate.label,
     sourceName: safety.violentCrimeRate.source.name,
@@ -708,8 +733,7 @@ function renderPoliticsTab() {
   renderBarChart(violentCard.canvasId, safety.violentCrimeRate);
   renderAnalysisBlock(violentCard.analysisId, safety.violentCrimeRate);
 
-  // Property Crime Rate
-  const propCrimeCard = buildChartCardWithAnalysis(grid, {
+  const propCrimeCard = buildChartCardWithAnalysis(crimeGrid, {
     id: "chart-property-crime",
     title: safety.propertyCrimeRate.label,
     sourceName: safety.propertyCrimeRate.source.name,
@@ -718,11 +742,10 @@ function renderPoliticsTab() {
   renderBarChart(propCrimeCard.canvasId, safety.propertyCrimeRate);
   renderAnalysisBlock(propCrimeCard.analysisId, safety.propertyCrimeRate);
 
-  // Employment Law section
-  buildSectionDivider(grid, "Employment Law & Worker Protections");
-
+  // --- Employment Law ---
   if (p && p.employmentLaw) {
-    const empLawId = buildContextCard(grid, {
+    const empGrid = buildPoliticsSection(outerGrid, "Employment Law & Worker Protections");
+    const empLawId = buildContextCard(empGrid, {
       id: "panel-employment-law",
       title: p.employmentLaw.label,
       sourceName: p.employmentLaw.source.name,
@@ -732,11 +755,10 @@ function renderPoliticsTab() {
     renderPoliticsPanel(empLawId, p.employmentLaw);
   }
 
-  // Firearms Law section
-  buildSectionDivider(grid, "Firearms Laws & 2nd Amendment Environment");
-
+  // --- Firearms Law ---
   if (p && p.firearmsLaw) {
-    const firearmsId = buildContextCard(grid, {
+    const firearmsGrid = buildPoliticsSection(outerGrid, "Firearms Laws & 2nd Amendment Environment");
+    const firearmsId = buildContextCard(firearmsGrid, {
       id: "panel-firearms-law",
       title: p.firearmsLaw.label,
       sourceName: p.firearmsLaw.source.name,

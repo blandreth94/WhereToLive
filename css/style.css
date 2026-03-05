@@ -671,6 +671,33 @@ table.data-table td.highlight-bad {
   line-height: 1.55;
 }
 
+/* --- Politics Section Layout (wraps heading + inner grid) - */
+.politics-section {
+  margin-bottom: var(--space-xl);
+}
+
+.politics-section:last-child {
+  margin-bottom: 0;
+}
+
+.politics-section-heading {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+  padding-bottom: var(--space-sm);
+  border-bottom: 2px solid var(--border);
+  margin-bottom: var(--space-lg);
+}
+
+.politics-inner-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(520px, 100%), 1fr));
+  gap: var(--space-xl);
+  align-items: start;
+}
+
 /* --- Politics Panel --------------------------------------- */
 .politics-panel-grid {
   display: grid;
@@ -753,46 +780,55 @@ table.data-table td.highlight-bad {
   padding-top: var(--space-sm);
 }
 
-/* --- Lifestyle Full Analysis (expandable) ----------------- */
-.lifestyle-full-analysis {
-  border-top: 1px solid var(--border);
-  padding-top: var(--space-sm);
-  margin-top: var(--space-sm);
+/* --- Lifestyle Short/Long Toggle -------------------------- */
+.lifestyle-toggle-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
 }
 
-.lifestyle-full-analysis summary {
+.lifestyle-toggle-label {
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--text-secondary);
+}
+
+.lifestyle-toggle-btn {
+  padding: var(--space-xs) var(--space-md);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-secondary);
   cursor: pointer;
-  user-select: none;
-  padding: var(--space-xs) 0;
-  list-style: none;
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
-.lifestyle-full-analysis summary::before {
-  content: "▶";
-  font-size: 0.625rem;
-  transition: transform 0.2s;
-  color: var(--accent);
+.lifestyle-toggle-btn.active {
+  background: var(--bg-tab-active);
+  color: var(--text-light);
+  border-color: var(--bg-tab-active);
 }
 
-.lifestyle-full-analysis[open] summary::before {
-  transform: rotate(90deg);
-}
-
-.lifestyle-full-analysis summary:hover {
+.lifestyle-toggle-btn:not(.active):hover {
+  background: var(--bg-tab-hover);
   color: var(--text-primary);
 }
 
+/* --- Lifestyle Full Analysis Block ----------------------- */
 .lifestyle-full-analysis-text {
   font-size: 0.8125rem;
   color: var(--text-secondary);
   line-height: 1.65;
   padding-top: var(--space-sm);
+}
+
+.lifestyle-full-analysis-block {
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-md);
+  margin-top: var(--space-xs);
 }
 
 /* --- Responsive ------------------------------------------- */

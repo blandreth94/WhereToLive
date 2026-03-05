@@ -394,12 +394,13 @@ function renderExpensesTab() {
 
 /* ----------------------------------------------------------
    RENDER: Climate & Environment Tab
-   (Weather + Natural Disaster Risk — no crime)
+   (Weather + Parkland + Natural Disaster Risk)
    ---------------------------------------------------------- */
 function renderClimateTab() {
-  const climate  = CITY_DATA.climate;
-  const disaster = CITY_DATA.disasterRisk;
-  const grid     = "charts-climate";
+  const climate   = CITY_DATA.climate;
+  const disaster  = CITY_DATA.disasterRisk;
+  const lifestyle = CITY_DATA.lifestyle;
+  const grid      = "charts-climate";
 
   // Temperature grouped chart (summer high / winter low)
   buildChartCard(grid, {
@@ -477,6 +478,16 @@ function renderClimateTab() {
   renderBarChart(sunnyCard.canvasId, climate.sunnyDaysPerYear);
   renderAnalysisBlock(sunnyCard.analysisId, climate.sunnyDaysPerYear);
 
+  // Park Land % (moved here from Lifestyle tab)
+  const parksCard = buildChartCardWithAnalysis(grid, {
+    id: "chart-parks",
+    title: lifestyle.parkLandPercent.label,
+    sourceName: lifestyle.parkLandPercent.source.name,
+    sourceUrl:  lifestyle.parkLandPercent.source.url
+  });
+  renderBarChart(parksCard.canvasId, lifestyle.parkLandPercent);
+  renderAnalysisBlock(parksCard.analysisId, lifestyle.parkLandPercent);
+
   // Natural Disaster Risk (grouped overview)
   buildChartCard(grid, {
     id: "chart-disaster",
@@ -522,20 +533,19 @@ function renderClimateTab() {
   renderBarChart(wildfireCard.canvasId, disaster.wildfireRisk);
   renderAnalysisBlock(wildfireCard.analysisId, disaster.wildfireRisk);
 
-  // Sources (climate + disaster only — crime is in Lifestyle tab)
-  const allSources = collectSources({ ...climate, ...disaster });
+  // Sources (climate + disaster + parkland)
+  const allSources = collectSources({ ...climate, ...disaster, parkLandPercent: lifestyle.parkLandPercent });
   renderSources("sources-list-climate", allSources);
 }
 
 /* ----------------------------------------------------------
-   RENDER: Lifestyle & Recreation Tab
-   (Commute, Transit, Parks, Crime, Lifestyle Highlights)
+   RENDER: Travel & Transit Tab
+   (Commute, Transit, Destination Accessibility)
    ---------------------------------------------------------- */
-function renderLifestyleTab() {
-  const d      = CITY_DATA.lifestyle;
-  const safety = CITY_DATA.safety;
-  const ctx    = CITY_DATA.context;
-  const grid   = "charts-lifestyle";
+function renderTravelTab() {
+  const d   = CITY_DATA.lifestyle;
+  const ctx = CITY_DATA.context;
+  const grid = "charts-travel";
 
   // Commute Time
   const commuteCard = buildChartCardWithAnalysis(grid, {
@@ -548,6 +558,17 @@ function renderLifestyleTab() {
   renderHorizontalBarChart(commuteCard.canvasId, d.avgCommuteMinutes);
   renderAnalysisBlock(commuteCard.analysisId, d.avgCommuteMinutes);
 
+  // Commute suburb context table
+  if (d.avgCommuteMinutes.suburbData) {
+    const commuteSuburbId = buildSuburbTableCard(grid, {
+      id: "table-commute-suburbs",
+      title: d.avgCommuteMinutes.suburbData.title,
+      sourceName: d.avgCommuteMinutes.suburbData.source.name,
+      sourceUrl:  d.avgCommuteMinutes.suburbData.source.url
+    });
+    renderSuburbTable(commuteSuburbId, d.avgCommuteMinutes.suburbData);
+  }
+
   // Transit Options (stat cards)
   const transitIds = buildStatCardContainerWithAnalysis(grid, {
     id: "statcards-transit",
@@ -559,17 +580,38 @@ function renderLifestyleTab() {
   renderStatCards(transitIds.containerId, d.transitDescription);
   renderAnalysisBlock(transitIds.analysisId, d.transitDescription);
 
-  // Park Land %
-  const parksCard = buildChartCardWithAnalysis(grid, {
-    id: "chart-parks",
-    title: d.parkLandPercent.label,
-    sourceName: d.parkLandPercent.source.name,
-    sourceUrl:  d.parkLandPercent.source.url
-  });
-  renderBarChart(parksCard.canvasId, d.parkLandPercent);
-  renderAnalysisBlock(parksCard.analysisId, d.parkLandPercent);
+  // Destination Accessibility (aviation)
+  if (ctx && ctx.lifestyleHighlights) {
+    const destId = buildContextCard(grid, {
+      id: "panel-destination-accessibility",
+      title: "Destination Accessibility — Airport &amp; Flight Connectivity",
+      sourceName: ctx.lifestyleHighlights.source.name,
+      sourceUrl:  ctx.lifestyleHighlights.source.url,
+      fullWidth: true
+    });
+    renderDestinationAccessibility(destId, ctx.lifestyleHighlights);
+  }
 
-  // Lifestyle Highlights (skiing, BLM, aviation, motorcycle)
+  // Sources
+  const travelSources = collectSources({
+    avgCommuteMinutes:  d.avgCommuteMinutes,
+    transitDescription: d.transitDescription
+  });
+  if (ctx && ctx.lifestyleHighlights) {
+    travelSources.push({ name: ctx.lifestyleHighlights.source.name, url: ctx.lifestyleHighlights.source.url });
+  }
+  renderSources("sources-list-travel", travelSources);
+}
+
+/* ----------------------------------------------------------
+   RENDER: Lifestyle & Recreation Tab
+   (Lifestyle Highlights — skiing, BLM, motorcycle, social scene)
+   ---------------------------------------------------------- */
+function renderLifestyleTab() {
+  const ctx  = CITY_DATA.context;
+  const grid = "charts-lifestyle";
+
+  // Lifestyle Highlights (skiing, BLM, motorcycle, social scene)
   if (ctx && ctx.lifestyleHighlights) {
     const highlightId = buildContextCard(grid, {
       id: "panel-lifestyle-highlights",
@@ -582,8 +624,10 @@ function renderLifestyleTab() {
   }
 
   // Sources
-  const allSources = collectSources(d);
-  renderSources("sources-list-lifestyle", allSources);
+  const lifestyleSources = ctx && ctx.lifestyleHighlights
+    ? [{ name: ctx.lifestyleHighlights.source.name, url: ctx.lifestyleHighlights.source.url }]
+    : [];
+  renderSources("sources-list-lifestyle", lifestyleSources);
 }
 
 /* ----------------------------------------------------------
@@ -785,6 +829,7 @@ const TAB_RENDERERS = {
   cost:      { fn: renderCostTab,      rendered: false },
   expenses:  { fn: renderExpensesTab,  rendered: false },
   climate:   { fn: renderClimateTab,   rendered: false },
+  travel:    { fn: renderTravelTab,    rendered: false },
   lifestyle: { fn: renderLifestyleTab, rendered: false },
   childcare: { fn: renderChildcareTab, rendered: false },
   politics:  { fn: renderPoliticsTab,  rendered: false }

@@ -31,6 +31,9 @@
       <button class="tab-btn" role="tab" data-tab="climate" aria-selected="false">
         Climate &amp; Environment
       </button>
+      <button class="tab-btn" role="tab" data-tab="travel" aria-selected="false">
+        Travel &amp; Transit
+      </button>
       <button class="tab-btn" role="tab" data-tab="lifestyle" aria-selected="false">
         Lifestyle &amp; Recreation
       </button>
@@ -75,7 +78,7 @@
       <section class="tab-panel" id="tab-climate" role="tabpanel">
         <div class="panel-intro">
           <h2>Climate &amp; Environment</h2>
-          <p>Temperature ranges, precipitation, snowfall, sunny days, and FEMA natural disaster risk scores (tornado, flood, wildfire). Weather and environmental risk are evaluated together as conditions that nature imposes on daily life.</p>
+          <p>Temperature ranges, precipitation, snowfall, sunny days, parkland as a % of city area, and FEMA natural disaster risk scores (tornado, flood, wildfire). Weather, green space, and environmental risk are evaluated together as conditions that shape daily life.</p>
         </div>
         <div class="charts-grid" id="charts-climate"></div>
         <details class="sources-panel" id="sources-climate">
@@ -84,11 +87,24 @@
         </details>
       </section>
 
+      <!-- Travel & Transit Tab -->
+      <section class="tab-panel" id="tab-travel" role="tabpanel">
+        <div class="panel-intro">
+          <h2>Travel &amp; Transit</h2>
+          <p>Average commute times with suburb-level route breakdowns, public transit infrastructure, and destination accessibility — airport connectivity, flight frequency, and practical domestic travel options from each metro.</p>
+        </div>
+        <div class="charts-grid" id="charts-travel"></div>
+        <details class="sources-panel" id="sources-travel">
+          <summary>Data Sources &amp; Methodology</summary>
+          <ul id="sources-list-travel"></ul>
+        </details>
+      </section>
+
       <!-- Lifestyle & Recreation Tab -->
       <section class="tab-panel" id="tab-lifestyle" role="tabpanel">
         <div class="panel-intro">
           <h2>Lifestyle &amp; Recreation</h2>
-          <p>Commute times (with suburb-to-city routes), public transit options, parkland access, crime rates, and qualitative lifestyle highlights: skiing, BLM/public land access, aviation connectivity, and motorcycle culture.</p>
+          <p>Qualitative lifestyle highlights for skiing access, BLM/public land, motorcycle culture, and social scene &amp; networking. Use the Summary / Full Analysis toggle for per-city deep-dives.</p>
         </div>
         <div class="charts-grid" id="charts-lifestyle"></div>
         <details class="sources-panel" id="sources-lifestyle">
@@ -114,7 +130,7 @@
       <section class="tab-panel" id="tab-politics" role="tabpanel">
         <div class="panel-intro">
           <h2>Politics &amp; Law</h2>
-          <p>Crime rates (violent &amp; property), state employment law and worker protections, and firearms legislation. These factors differ dramatically by state and represent significant quality-of-life and legal compliance considerations for relocators.</p>
+          <p>Crime rates (violent &amp; property), alcohol laws &amp; hospitality ecosystem, state employment law and worker protections, and firearms legislation. These factors differ dramatically by state and represent significant quality-of-life and legal considerations for relocators.</p>
         </div>
         <div class="politics-tab-container" id="charts-politics"></div>
         <details class="sources-panel" id="sources-politics">

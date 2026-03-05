@@ -582,6 +582,72 @@ function renderAlcoholLawsPanel(containerId, politicsData) {
 }
 
 /* ----------------------------------------------------------
+   Render destination accessibility panel (aviation / airport connectivity)
+   Reads aviation / aviationFull from lifestyleHighlights context values.
+   Summary / Full Analysis toggle — same pattern as renderAlcoholLawsPanel.
+   ---------------------------------------------------------- */
+function renderDestinationAccessibility(containerId, contextData) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const colors = getCityColors();
+  container.innerHTML = "";
+
+  // Toggle bar
+  const toggleBar = document.createElement("div");
+  toggleBar.className = "lifestyle-toggle-bar";
+  toggleBar.innerHTML = `
+    <span class="lifestyle-toggle-label">View:</span>
+    <button class="lifestyle-toggle-btn active" data-view="short">Summary</button>
+    <button class="lifestyle-toggle-btn" data-view="long">Full Analysis</button>
+  `;
+  container.appendChild(toggleBar);
+
+  toggleBar.addEventListener("click", (e) => {
+    const btn = e.target.closest(".lifestyle-toggle-btn");
+    if (!btn) return;
+    const view = btn.dataset.view;
+    toggleBar.querySelectorAll(".lifestyle-toggle-btn").forEach(b => b.classList.toggle("active", b.dataset.view === view));
+    container.querySelectorAll(".dest-view-short").forEach(el => el.style.display = view === "short" ? "" : "none");
+    container.querySelectorAll(".dest-view-long").forEach(el => el.style.display = view === "long" ? "" : "none");
+  });
+
+  // City cards grid
+  const grid = document.createElement("div");
+  grid.className = "politics-panel-grid";
+
+  CITY_DATA.meta.cities.forEach(city => {
+    const d = contextData.values[city.key];
+    if (!d || !d.aviation) return;
+
+    const card = document.createElement("div");
+    card.className = "politics-card";
+    card.style.borderLeftColor = colors[city.key];
+
+    const header = `
+      <div class="politics-card-header">
+        <span class="politics-city-dot" style="background:${colors[city.key]}"></span>
+        <strong>${city.label}</strong>
+      </div>`;
+
+    const shortView = document.createElement("div");
+    shortView.className = "dest-view-short";
+    shortView.innerHTML = header + `<p class="politics-card-full">${d.aviation}</p>`;
+
+    const longView = document.createElement("div");
+    longView.className = "dest-view-long";
+    longView.style.display = "none";
+    longView.innerHTML = header + `<p class="politics-card-full">${d.aviationFull || d.aviation}</p>`;
+
+    card.appendChild(shortView);
+    card.appendChild(longView);
+    grid.appendChild(card);
+  });
+
+  container.appendChild(grid);
+}
+
+/* ----------------------------------------------------------
    Render lifestyle highlights panel
    Toggle between short (4-category grid) and long (full analysis
    with categories preserved as named sections)
@@ -596,7 +662,7 @@ function renderLifestyleHighlights(containerId, contextData) {
   // Global short/long toggle — only shown once, above all cities
   const hasFullAnalysis = CITY_DATA.meta.cities.some(city => {
     const v = contextData.values[city.key];
-    return v && (v.skiingFull || v.blmFull || v.aviationFull || v.motorcycleFull || v.socialFull);
+    return v && (v.skiingFull || v.blmFull || v.motorcycleFull || v.socialFull);
   });
   if (hasFullAnalysis) {
     const toggleBar = document.createElement("div");
@@ -625,11 +691,10 @@ function renderLifestyleHighlights(containerId, contextData) {
     const section = document.createElement("div");
     section.className = "lifestyle-highlights-city";
 
-    // Build categories array dynamically
+    // Build categories array dynamically (aviation lives in Travel & Transit tab)
     const categories = [
       { label: "Skiing Access",      short: d.skiing,     full: d.skiingFull },
       { label: "BLM / Public Land",  short: d.blm,        full: d.blmFull },
-      { label: "Aviation (SoCal)",   short: d.aviation,   full: d.aviationFull },
       { label: "Motorcycle Culture", short: d.motorcycle, full: d.motorcycleFull }
     ];
     if (d.social) {

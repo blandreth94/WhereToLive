@@ -585,36 +585,34 @@ function renderLifestyleHighlights(containerId, contextData) {
       </div>
     `;
 
-    // Long view (full analysis with 4-category structure + paragraph)
+    // Long view: each category shows its short summary + full paragraph beneath
     const longView = document.createElement("div");
     longView.className = "lifestyle-view-long";
     longView.style.display = "none";
+
+    const categories = [
+      { label: "Skiing Access",      short: d.skiing,     full: d.skiingFull },
+      { label: "BLM / Public Land",  short: d.blm,        full: d.blmFull },
+      { label: "Aviation (SoCal)",   short: d.aviation,   full: d.aviationFull },
+      { label: "Motorcycle Culture", short: d.motorcycle, full: d.motorcycleFull }
+    ];
+
+    const catItemsHtml = categories.map(cat => `
+      <div class="highlight-item highlight-item-full">
+        <div class="highlight-label">${cat.label}</div>
+        <div class="highlight-text">${cat.short}</div>
+        ${cat.full ? `<p class="highlight-full-text">${cat.full}</p>` : ""}
+      </div>
+    `).join("");
+
     longView.innerHTML = `
       <div class="lifestyle-city-header" style="border-left-color:${colors[city.key]}">
         <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${colors[city.key]};margin-right:8px;vertical-align:middle;flex-shrink:0"></span>
         <strong>${city.label}</strong>
       </div>
-      <div class="lifestyle-highlights-grid" style="margin-bottom:var(--space-md)">
-        <div class="highlight-item">
-          <div class="highlight-label">Skiing Access</div>
-          <div class="highlight-text">${d.skiing}</div>
-        </div>
-        <div class="highlight-item">
-          <div class="highlight-label">BLM / Public Land</div>
-          <div class="highlight-text">${d.blm}</div>
-        </div>
-        <div class="highlight-item">
-          <div class="highlight-label">Aviation (SoCal)</div>
-          <div class="highlight-text">${d.aviation}</div>
-        </div>
-        <div class="highlight-item">
-          <div class="highlight-label">Motorcycle Culture</div>
-          <div class="highlight-text">${d.motorcycle}</div>
-        </div>
+      <div class="lifestyle-highlights-grid lifestyle-highlights-grid-full">
+        ${catItemsHtml}
       </div>
-      ${d.fullAnalysis ? `
-      <div class="lifestyle-full-analysis-text lifestyle-full-analysis-block">${d.fullAnalysis}</div>
-      ` : ""}
     `;
 
     section.appendChild(shortView);

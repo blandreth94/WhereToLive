@@ -671,6 +671,28 @@ table.data-table td.highlight-bad {
   line-height: 1.55;
 }
 
+/* Full-view: category items stack vertically, full-width */
+.lifestyle-highlights-grid-full {
+  grid-template-columns: 1fr;
+}
+
+.highlight-item-full {
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-md);
+}
+
+.highlight-item-full:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.highlight-full-text {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin-top: var(--space-xs);
+}
+
 /* --- Politics Section Layout (wraps heading + inner grid) - */
 .politics-section {
   margin-bottom: var(--space-xl);
